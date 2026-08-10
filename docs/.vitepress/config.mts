@@ -5,7 +5,7 @@ const base = process.env.BASE_PATH || '/'
 export default defineConfig({
   lang: 'zh-CN',
   title: '知汇',
-  description: '把零散知识沉淀为可复用的认知体系',
+  description: '按主题整理 AI、工程与项目实践笔记',
   base,
   cleanUrls: true,
   lastUpdated: true,
@@ -22,11 +22,9 @@ export default defineConfig({
     siteTitle: false,
     nav: [
       { text: '首页', link: '/' },
-      { text: '知识方法', link: '/methods/capture' },
-      { text: '技术专题', link: '/topics/ai-foundation' },
-      { text: 'AI 能力体验', link: '/zh-cn/stage-1/ai-capabilities-through-games/' },
-      { text: '阅读笔记', link: '/reading/how-to-read' },
-      { text: '实践案例', link: '/cases/project-retro' },
+      { text: 'AI Infra', link: '/ai-infra/' },
+      { text: 'Agent 能力', link: '/agents/' },
+      { text: '技术棚屋', link: '/shed/projects' },
       {
         text: '简体中文',
         items: [{ text: '简体中文', link: '/' }]
@@ -34,36 +32,39 @@ export default defineConfig({
     ],
     sidebar: [
       {
-        text: '第一章 建立知识系统',
+        text: '知识总览',
         collapsed: false,
         items: [
-          { text: '从零散到体系', link: '/' },
-          { text: '知识地图', link: '/guide/knowledge-map' },
-          { text: 'AI 时代的编程初体验', link: '/zh-cn/stage-1/ai-capabilities-through-games/' }
+          { text: '分组首页', link: '/' }
         ]
       },
       {
-        text: '第二章 捕获与整理',
+        text: 'AI Infra',
         collapsed: false,
         items: [
-          { text: '高质量捕获', link: '/methods/capture' },
-          { text: '渐进式总结', link: '/methods/progressive-summary' }
+          { text: '体系总览', link: '/ai-infra/' },
+          { text: '计算、通信与云原生', link: '/ai-infra/compute-network' },
+          { text: '训练与推理系统', link: '/ai-infra/training-inference' },
+          { text: '模型、数据与应用', link: '/ai-infra/models-data-apps' },
+          { text: '算子工程方法', link: '/ai-infra/operator-engineering' }
         ]
       },
       {
-        text: '第三章 技术专题',
+        text: 'Agent 能力',
         collapsed: false,
         items: [
-          { text: 'AI 基础认知', link: '/topics/ai-foundation' },
-          { text: '前端工程地图', link: '/topics/frontend-map' }
+          { text: '主题总览', link: '/agents/' },
+          { text: '训练、推理与反馈', link: '/agents/training-and-reasoning' },
+          { text: 'Prompt 与上下文工程', link: '/agents/prompt-and-context' },
+          { text: '研究雷达', link: '/agents/research-radar' }
         ]
       },
       {
-        text: '第四章 阅读与实践',
+        text: '技术棚屋',
         collapsed: false,
         items: [
-          { text: '如何做主题阅读', link: '/reading/how-to-read' },
-          { text: '项目复盘模板', link: '/cases/project-retro' }
+          { text: '项目与实验', link: '/shed/projects' },
+          { text: '工程经验与踩坑', link: '/shed/engineering-notes' }
         ]
       },
       {
@@ -73,6 +74,7 @@ export default defineConfig({
           { text: '内容维护指南', link: '/appendix/maintenance' },
           { text: 'Markdown 组件示例', link: '/appendix/components' },
           { text: '开发守则', link: '/appendix/development-rules' },
+          { text: 'Notion 来源索引', link: '/appendix/notion-sources' },
           { text: '来源与许可', link: '/appendix/attribution' }
         ]
       }
