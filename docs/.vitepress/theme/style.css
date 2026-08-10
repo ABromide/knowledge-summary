@@ -1,0 +1,338 @@
+:root {
+  --vp-c-brand-1: #0071e3;
+  --vp-c-brand-2: #0077ed;
+  --vp-c-brand-3: #0068d1;
+  --vp-c-brand-soft: rgba(0, 113, 227, 0.14);
+  --vp-sidebar-nav-section-gap: 8px;
+  --knowledge-doc-font-size: 13px;
+  --knowledge-doc-line-height: 1.65;
+  --vp-layout-max-width: 1440px;
+}
+
+.dark {
+  --vp-c-brand-1: #2997ff;
+  --vp-c-brand-2: #0077ed;
+  --vp-c-brand-3: #0071e3;
+  --vp-c-brand-soft: rgba(0, 113, 227, 0.18);
+}
+
+.VPNavBarTitle .logo {
+  width: 118px;
+  height: 28px;
+}
+
+.knowledge-sidebar-toggle {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  place-items: center;
+  color: var(--vp-c-text-2);
+  border-radius: 7px;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.knowledge-sidebar-toggle:hover {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-default-soft);
+}
+
+.knowledge-sidebar-toggle svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.vp-doc {
+  font-size: var(--knowledge-doc-font-size);
+  line-height: var(--knowledge-doc-line-height);
+}
+
+.vp-doc p,
+.vp-doc ul,
+.vp-doc ol {
+  line-height: var(--knowledge-doc-line-height);
+}
+
+.vp-doc :where(p, ul, ol, table, blockquote, pre, details, figure) {
+  margin: 10px 0;
+}
+
+.vp-doc :where(li) {
+  margin: 4px 0;
+}
+
+.vp-doc :where(ul, ol) {
+  padding-left: 1.15em;
+}
+
+.vp-doc h1 {
+  margin: 22px 0 12px;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+}
+
+.vp-doc h2 {
+  margin: 16px 0 8px;
+  padding-top: 10px;
+  border-top: 0;
+  font-size: 24px;
+}
+
+.vp-doc h3 {
+  margin: 18px 0 8px;
+  font-size: 19px;
+}
+
+.vp-doc blockquote {
+  font-size: 0.9em;
+  color: var(--vp-c-text-2);
+}
+
+.vp-doc :where(th, td) {
+  padding: 6px 10px;
+}
+
+.VPSidebarItem.level-0 {
+  padding-bottom: 4px;
+}
+
+.VPSidebarItem.level-0 > .item {
+  padding-bottom: 2px;
+}
+
+.VPSidebarItem.level-1 .item,
+.VPSidebarItem.level-2 .item,
+.VPSidebarItem.level-3 .item {
+  min-height: 24px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.VPSidebarItem.level-0 .text {
+  line-height: 1.3;
+}
+
+.VPSidebarItem.level-1 .text,
+.VPSidebarItem.level-2 .text,
+.VPSidebarItem.level-3 .text {
+  padding: 0;
+  line-height: 1.4;
+}
+
+.VPSidebarItem .VPLink {
+  min-height: auto;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.page-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 58px;
+  margin-bottom: 16px;
+  color: var(--vp-c-text-3);
+  font-size: 12px;
+}
+
+.page-tools button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 42px;
+  padding: 8px 14px;
+  color: var(--vp-c-text-2);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.page-tools button:hover {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-default-soft);
+}
+
+.page-tools svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.summary-hero {
+  margin: 12px 0 18px;
+}
+
+.summary-goals {
+  padding: 16px 20px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px 10px 0 0;
+  background: var(--vp-c-bg-soft);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.summary-goals .eyebrow,
+.stat-heading {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--vp-c-brand-1);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.goal-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.goal-list span {
+  padding: 4px 9px;
+  color: var(--vp-c-text-1);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  background: var(--vp-c-bg);
+  font-size: 12px;
+}
+
+.summary-goals p:last-child {
+  margin-bottom: 0;
+}
+
+.summary-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--vp-c-divider);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+
+.summary-meta article {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 13px 16px;
+}
+
+.summary-meta article + article {
+  border-left: 1px solid var(--vp-c-divider);
+}
+
+.summary-meta .meta-icon {
+  font-size: 18px;
+}
+
+.summary-meta strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.summary-meta p {
+  margin: 0;
+  color: var(--vp-c-text-2);
+  font-size: 12px;
+}
+
+.stat-panel {
+  overflow: hidden;
+  margin: 14px 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg-soft);
+}
+
+.stat-heading {
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stat-item {
+  padding: 16px 10px;
+  text-align: center;
+}
+
+.stat-item + .stat-item {
+  border-left: 1px solid var(--vp-c-divider);
+}
+
+.stat-item strong {
+  display: block;
+  color: var(--vp-c-brand-1);
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.stat-item span {
+  color: var(--vp-c-text-2);
+  font-size: 11px;
+}
+
+@media (min-width: 960px) {
+  html.sidebar-collapsed .VPSidebar {
+    display: none;
+  }
+
+  html.sidebar-collapsed .VPNavBar.has-sidebar .title {
+    width: auto;
+  }
+
+  html.sidebar-collapsed .VPNavBar.has-sidebar .content {
+    padding-left: 16px;
+  }
+
+  html.sidebar-collapsed .VPContent.has-sidebar {
+    padding-left: 0;
+  }
+
+  html.sidebar-collapsed .VPContent.has-sidebar .VPDoc {
+    padding-left: 32px;
+  }
+}
+
+@media (max-width: 959px) {
+  .knowledge-sidebar-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .summary-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-meta article + article {
+    border-top: 1px solid var(--vp-c-divider);
+    border-left: 0;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat-item:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid var(--vp-c-divider);
+  }
+
+  .stat-item:nth-child(4) {
+    border-top: 1px solid var(--vp-c-divider);
+  }
+
+  .vp-doc h1 {
+    font-size: 26px;
+  }
+}
