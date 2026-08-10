@@ -5,6 +5,8 @@ import PageTools from './components/PageTools.vue'
 import SidebarToggle from './components/SidebarToggle.vue'
 import SummaryHero from './components/SummaryHero.vue'
 import StatGrid from './components/StatGrid.vue'
+import LearningSteps from './components/LearningSteps.vue'
+import CapabilityBoard from './components/CapabilityBoard.vue'
 import './style.css'
 
 export default {
@@ -17,5 +19,7 @@ export default {
   enhanceApp({ app }) {
     app.component('SummaryHero', SummaryHero)
     app.component('StatGrid', StatGrid)
+    app.component('LearningSteps', LearningSteps)
+    app.component('CapabilityBoard', CapabilityBoard)
   }
 } satisfies Theme

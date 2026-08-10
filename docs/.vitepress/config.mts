@@ -15,12 +15,16 @@ export default defineConfig({
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}assets/mark.svg` }]
   ],
   themeConfig: {
-    logo: '/assets/logo.svg',
+    logo: {
+      light: '/assets/logo.svg',
+      dark: '/assets/logo-dark.svg'
+    },
     siteTitle: false,
     nav: [
       { text: '首页', link: '/' },
       { text: '知识方法', link: '/methods/capture' },
       { text: '技术专题', link: '/topics/ai-foundation' },
+      { text: 'AI 能力体验', link: '/zh-cn/stage-1/ai-capabilities-through-games/' },
       { text: '阅读笔记', link: '/reading/how-to-read' },
       { text: '实践案例', link: '/cases/project-retro' },
       {
@@ -34,7 +38,8 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: '从零散到体系', link: '/' },
-          { text: '知识地图', link: '/guide/knowledge-map' }
+          { text: '知识地图', link: '/guide/knowledge-map' },
+          { text: 'AI 时代的编程初体验', link: '/zh-cn/stage-1/ai-capabilities-through-games/' }
         ]
       },
       {
@@ -66,7 +71,9 @@ export default defineConfig({
         collapsed: true,
         items: [
           { text: '内容维护指南', link: '/appendix/maintenance' },
-          { text: 'Markdown 组件示例', link: '/appendix/components' }
+          { text: 'Markdown 组件示例', link: '/appendix/components' },
+          { text: '开发守则', link: '/appendix/development-rules' },
+          { text: '来源与许可', link: '/appendix/attribution' }
         ]
       }
     ],
