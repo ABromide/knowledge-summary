@@ -10,7 +10,7 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   head: [
-    ['meta', { name: 'theme-color', content: '#0071e3' }],
+    ['meta', { name: 'theme-color', content: '#2563eb' }],
     ['meta', { name: 'keywords', content: '知识总结,知识管理,学习笔记,技术文档' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}assets/mark.svg` }]
   ],
@@ -25,10 +25,6 @@ export default defineConfig({
       { text: 'AI Infra', link: '/ai-infra/' },
       { text: 'Agent 能力', link: '/agents/' },
       { text: '技术棚屋', link: '/shed/projects' },
-      {
-        text: '简体中文',
-        items: [{ text: '简体中文', link: '/' }]
-      }
     ],
     sidebar: [
       {

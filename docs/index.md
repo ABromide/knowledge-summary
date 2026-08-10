@@ -2,6 +2,7 @@
 title: Notion 知识总览
 description: 按 AI Infra、Agent 能力与技术棚屋三条主线整理个人 Notion 笔记。
 pageClass: knowledge-home
+pageTools: false
 ---
 
 # Notion 知识总览
@@ -31,23 +32,23 @@ pageClass: knowledge-home
 ## 三个知识分组
 
 <div class="topic-grid">
-  <a class="topic-card topic-card--infra" href="./ai-infra/">
+  <a class="topic-card" href="./ai-infra/">
     <span class="topic-card__index">01 / SYSTEMS</span>
     <strong>AI Infra</strong>
     <p>从计算集群、通信存储到训练、推理与算子优化，建立大模型系统的端到端地图。</p>
-    <span class="topic-card__link">进入体系 →</span>
+    <span class="topic-card__link">进入体系 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg></span>
   </a>
-  <a class="topic-card topic-card--agent" href="./agents/">
+  <a class="topic-card" href="./agents/">
     <span class="topic-card__index">02 / INTELLIGENCE</span>
     <strong>Agent 能力</strong>
     <p>聚合 Agentic RL、on-policy distillation、Prompt Auto Tuning 与研究雷达。</p>
-    <span class="topic-card__link">查看主题 →</span>
+    <span class="topic-card__link">查看主题 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg></span>
   </a>
-  <a class="topic-card topic-card--shed" href="./shed/projects">
+  <a class="topic-card" href="./shed/projects">
     <span class="topic-card__index">03 / PRACTICE</span>
     <strong>技术棚屋</strong>
     <p>沉淀个人项目、技术实验、架构经验和真实踩坑，重点记录决策与复用价值。</p>
-    <span class="topic-card__link">浏览实践 →</span>
+    <span class="topic-card__link">浏览实践 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg></span>
   </a>
 </div>
 
