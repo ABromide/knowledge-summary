@@ -10,6 +10,7 @@
     "docs:check": "vitepress build docs"
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "vitepress": "2.0.0-alpha.16",
     "vue": "^3.5.18"
   }

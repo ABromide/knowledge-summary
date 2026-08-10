@@ -28,6 +28,10 @@
 ./scripts/check.sh
 ```
 
-## 自动部署
+## 部署到 GitHub Pages
 
-推送到 `main` 分支后，GitHub Actions 会构建站点并发布到 GitHub Pages。部署配置位于 `.github/workflows/deploy-pages.yml`。
+完成内容更新并推送源码后，运行下面的脚本。脚本会使用 `/knowledge-summary/` 子路径重新构建，并把静态产物发布到 `gh-pages` 分支：
+
+```bash
+./scripts/deploy.sh
+```
