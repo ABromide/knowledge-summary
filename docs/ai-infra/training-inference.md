@@ -52,6 +52,13 @@ Prefill 对输入 token 并行计算，通常更偏计算密集；Decode 每步�
 
 训练评估也需要区分：新任务能力、原有能力保持、训练稳定性和真实成本。只有训练 loss 下降不能证明模型更可用。
 
+## 深入专题
+
+- [分布式训练](/ai-infra/distributed-training)：系统比较 DP、FSDP、TP、PP、CP 与 EP 的通信和拓扑代价。
+- [训练显存与数值](/ai-infra/training-memory-numerics)：用显存账本、重计算与混合精度解释“装得下”和“训得稳”。
+- [推理服务系统](/ai-infra/inference-serving)：从 KV Cache、连续批处理和调度理解在线推理。
+- [容量规划与成本](/ai-infra/capacity-economics)：把 QPS、token 长度、尾延迟、冗余和单位成本放在同一模型中。
+
 ## 来源
 
 - [Notion：04 大模型训练](https://app.notion.com/p/04-33b3a54bd6b48140ac71d14f9a1e84d2)

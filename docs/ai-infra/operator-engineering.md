@@ -48,6 +48,11 @@ RMSNorm、LayerNorm、bias + activation、optimizer step 和 LoRA 更新都是�
 
 生产算子的难点还包括 PyTorch 集成、自动求导、设备与 dtype 兼容、数值误差、构建发布和回退机制。性能、正确性和可部署性缺一不可。
 
+## 深入专题
+
+- [加速器与显存体系](/ai-infra/accelerators-memory)：补齐 Roofline、缓存、HBM、互连与低精度硬件背景。
+- [算子与编译器](/ai-infra/operator-compiler)：继续深入 Triton、编译图、动态 shape、自动调优、验证和生产回退。
+
 ## 来源
 
 - [Notion：AI Infra 算子开发经验总结](https://app.notion.com/p/AI-Infra-CUDA-Mode-Notes-36f3a54bd6b481e182baf9814158a976)

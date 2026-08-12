@@ -1,0 +1,130 @@
+---
+title: 大模型推理服务：从 Prefill 到 Decode
+description: 从计算特征、KV Cache、动态批处理与并行策略出发，理解低延迟、高吞吐推理服务的系统设计。
+---
+
+# 大模型推理服务：从 Prefill 到 Decode
+
+加载模型只是推理服务的起点。请求会随机到达，输入与输出长度悬殊；GPU 的计算、显存、带宽和互联又有不同饱和点。推理引擎要在这些约束中，把自回归生成拆成可调度、可缓存、可扩展的执行单元。
+
+本文先建立单请求的成本模型，再讨论多请求共享设备时的调度。结论不是“某个引擎永远最快”，而是：**工作负载、SLO、模型结构和硬件拓扑共同决定最优方案**。
+
+## 一次生成，其实是两种负载
+
+Transformer 推理包含两个性质不同的阶段。**Prefill** 把整段输入 prompt 一次送入模型，所有输入位置可以并行执行；它产生首个输出 token，同时为每一层保存后续所需的 Key、Value。**Decode** 随后逐 token 自回归：每轮只新增一个位置，却要读取模型权重和此前全部 KV Cache，直到遇到停止条件。
+
+因此，输入长度为 `S`、输出长度为 `O` 的请求，不是执行一次 `S + O` 长度的普通前向，而是一次较大的 prefill 加上约 `O - 1` 次小步 decode。Prefill 的大矩阵乘法有更高算术强度，通常更容易利用 GPU 计算单元；decode 单步矩阵很“瘦”，若并发不足，读取权重所花的时间远多于有效计算，更容易受显存带宽限制。NVIDIA 的[推理优化说明](https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/)也以这一区分解释吞吐与延迟为何不能由同一个 batch 参数同时优化。
+
+这一区分对应两类用户体验指标：prefill 主要决定 **TTFT（Time to First Token）**，decode 主要决定 **TPOT（Time per Output Token）** 或 ITL（相邻 token 间隔）。端到端时延近似为：
+
+`E2E ≈ 排队时间 + TTFT + (输出 token 数 - 1) × TPOT`
+
+公式的价值在于定位问题。长文档问答 TTFT 高，不等于生成阶段慢；短 prompt 的长篇创作 TPOT 稍差，累积后却可能主导总时延。平均值也会掩盖长输入阻塞短请求的尾部问题，所以线上至少要同时看 P50、P95/P99 TTFT、TPOT、端到端时延与 SLO 内完成的有效吞吐。
+
+<TradeoffExplorer preset="serving" />
+
+## KV Cache：用显存换掉重复计算
+
+自注意力需要当前 Query 与历史位置的 Key、Value 交互。若每生成一个 token 都重新计算完整前缀，历史计算会被反复执行。KV Cache 保存每层已生成位置的 K/V，使 decode 只计算新位置，然后读取历史缓存完成注意力。
+
+对于标准多头注意力，单请求 KV 占用可粗略写成：
+
+`KV 字节数 = token 数 × 层数 × 2(K和V) × KV头数 × 每头维度 × 每元素字节数`
+
+例如 32 层、32 个 KV 头、头维度 128、FP16/BF16 的模型，每个 token 约需要 `32 × 2 × 32 × 128 × 2 = 524,288` 字节，即约 512 KiB；8K 上下文单请求已经约 4 GiB。若模型使用 GQA/MQA，KV 头数少于 Query 头数，缓存会按比例下降。这里还未计模型权重、激活、CUDA Graph 和运行时工作区，因此“权重能放下”远不等于“服务能承载目标并发”。
+
+KV Cache 在 prefill 时创建，decode 时追加，请求结束时释放，重复前缀命中时复用，也可能在 GPU、CPU 与远端存储间换入换出。低精度 KV 能降低容量和带宽压力，但量化误差会进入以后每一步注意力，必须按目标任务评估；NVIDIA 的[NVFP4 KV Cache 实验](https://developer.nvidia.com/blog/optimizing-inference-for-long-context-and-large-batch-sizes-with-nvfp4-kv-cache/)只代表其特定硬件与模型组合。
+
+### 为什么连续显存分配会浪费
+
+生成长度事先未知。若为每个请求按最大长度预留连续空间，短输出留下大量内部碎片；若按当前长度扩容，又可能找不到足够大的连续区间，形成外部碎片。并发越高、请求长度分布越离散，问题越突出。更糟的是，一次无法满足的扩容可能触发抢占或重算，让尾延迟突然恶化。
+
+PagedAttention 借鉴虚拟内存：把逻辑连续的 KV 序列切成固定 token 数的块，用块表映射到不连续的物理显存。只在需要时分配新块，请求结束即可把块交还池中。原始 [PagedAttention 论文](https://arxiv.org/abs/2309.06180)报告其目标是把 KV 内存浪费降至接近零，并允许请求内、请求间共享缓存；块表的代价则是地址间接、专用注意力 kernel 和块元数据管理。它解决的是**分配与共享效率**，并不会减少每个有效 token 理论上应保存的 K/V 数据。
+
+块化还自然支持前缀缓存。vLLM 的[自动前缀缓存设计](https://docs.vllm.ai/en/v0.9.1/design/automatic_prefix_caching.html)以“前缀 token + 当前块 token”的哈希标识完整块；新请求若拥有相同系统提示词或共享文档前缀，可以直接复用已有 KV，只计算未命中的尾部。收益取决于重复率、缓存驻留和路由：随机 prompt 几乎没有命中，频繁变化的模板也可能让复用在块边界提前终止。缓存命中减少 prefill 计算，却不能加速新输出 token 的 decode。
+
+## Batching：批次不是越大越好
+
+静态批处理要等一组请求全部结束才换下一批。生成长度不同会产生“短请求陪跑”：已经完成的槽位无法及时释放，新请求只能在队列等待。Orca 提出的[迭代级调度](https://www.usenix.org/conference/osdi22/presentation/yu)把调度粒度降到一次模型迭代，每轮后移除完成请求、补入新请求，为后来常说的 continuous batching 奠定了系统化基础。
+
+连续批处理提高 decode 阶段有效 batch，让一次权重读取服务更多 token；但 batch 增长会占用更多 KV 显存，单轮执行时间也可能延长。调度器实际要在三类预算之间取舍：当前轮最多处理多少 token、最多容纳多少序列、预留多少 KV 块。达到容量上限后，新请求排队；若高估承载能力，则可能抢占正在生成的请求，将它的 KV 换出或丢弃后重算。
+
+### Prefill 与 Decode 如何同批
+
+把长 prefill 与 decode 放进同一轮，可提高设备利用率，却可能让正在流式输出的请求等完整个长 prompt，抬高 ITL。**Chunked Prefill** 把长输入切为多个 token 块，穿插到 decode 轮次；块越小，decode 干扰越容易控制，但 kernel 更碎、调度开销和重复边界处理更多。合理的 chunk 大小不是常量，应根据 TPOT SLO、输入长度分布和 GPU 饱和曲线测量。
+
+TensorRT-LLM 将这一类机制称为 [in-flight batching](https://nvidia.github.io/TensorRT-LLM/latest/advanced/gpt-attention.html)：运行中的批次可持续加入或移除序列，并结合 paged KV cache、调度策略和专用 attention kernel。它与 vLLM 的连续批处理解决相似问题，但构图、kernel、量化支持和参数语义不同；不能只对齐“最大 batch size”就宣称公平比较。
+
+<CapacityLab preset="inference" />
+
+## 并行：先问为什么跨卡
+
+推理并行有两个目的：让模型放得下，或让服务跑得更快。两者经常混淆。
+
+- **张量并行（TP）**切分单层矩阵，每层都需要集合通信。它能降低每卡权重与部分 KV 占用，但高频通信使跨低带宽节点扩展很差；在 NVLink 域内通常更合适。
+- **流水线并行（PP）**按层切分，通信量较低，却会引入阶段气泡。在线小 batch 下气泡尤其明显，足够多的微批才能摊薄。
+- **数据并行（DP）**复制模型并独立接流量，通常是扩展总 QPS 最直接的办法；代价是重复保存权重。
+- **专家并行（EP）**把 MoE 专家分散到设备，请求只激活部分专家。它节省单卡权重，但 token 路由会触发 All-to-All，热门专家与不均衡 token 分布可能成为瓶颈。
+- **上下文/序列并行**沿 token 维度切分注意力与 KV，适合单请求超长上下文，但需要额外通信与专用 kernel。
+
+选择顺序应当是：先做单卡或高速互联域基线；放不下时引入最少的模型并行，放得下但吞吐不足时优先增加副本。跨卡方案须同时报告每卡与整机吞吐、P99 和互联占用。
+
+## 聚合还是 Prefill/Decode 解耦
+
+常规聚合服务让同一组 GPU 同时执行 prefill 和 decode，KV 无需跨节点移动，架构简单，也能用 chunked prefill 控制干扰。但两阶段的资源需求不同：prefill 偏计算，decode 偏容量与带宽；混合调度还会造成 TTFT 与 TPOT 相互干扰，并把两阶段的扩缩容比例绑死。
+
+[DistServe](https://www.usenix.org/conference/osdi24/presentation/zhong-yinmin)把 prefill 与 decode 放到独立 GPU 池：前者完成 prompt 并把 KV 传给后者，两个池可使用不同并行策略与副本数，分别围绕 TTFT 和 TPOT 配置。它用 **goodput**——满足延迟 SLO 的请求吞吐——而非原始 tokens/s 作为目标，这是解耦最重要的评价方式。
+
+解耦并非免费。一个请求的全部 KV 必须跨设备传输；其字节数随输入长度、层数与 KV 头线性增长。若网络传输时间接近省下的排队或干扰时间，收益会消失。两个池的到达率不平衡还会在中间形成队列：prefill 太强会让完成的 KV 等待 decode，decode 太强则空转。故障恢复、KV 所有权、超时清理和跨池追踪也比单体引擎复杂。
+
+可用以下判断框架：
+
+1. **先测聚合基线。** 在真实长度分布下启用 continuous batching 与 chunked prefill，记录两类 SLO 的 goodput。
+2. **量化干扰。** 分别跑纯 prefill、纯 decode，再与混跑比较；若隔离后没有显著提升，解耦缺乏收益来源。
+3. **计算 KV 传输预算。** 用实测 KV 字节数除以端到端有效带宽，并计入序列化、排队和同步，而不是引用链路标称带宽。
+4. **压测比例漂移。** 输入突然变长或输出突然变长时，静态 P/D 配比会失衡；需要路由、弹性或回退到聚合池。
+5. **按 goodput 决策。** 即使总 tokens/s 上升，只要 P99 TTFT/TPOT 违约更多，就不是线上容量提升。
+
+## 用真实工作负载选择调度方案
+
+同一个模型不应只保留一套“最佳参数”。下面三类负载会把系统推向完全不同的工作点，适合拆成独立服务等级进行回放和验收。
+
+### 交互式问答：短输入、短输出、到达突发
+
+客服和站内问答通常要求用户迅速看到首字，核心约束是 P95/P99 TTFT；输出不长，TPOT 只要维持可读流速即可。此时应限制入口排队时间和单轮 prefill token 数，避免一个偶发长 prompt 阻塞整批 decode。前缀稳定的系统提示词适合缓存，但要分别压测冷缓存和热缓存，防止上线后用热缓存结果高估容量。
+
+验收时应混入少量长请求制造干扰，并观察短请求的 TTFT 是否跳升。若 GPU 计算利用率不高、入口队列却增长，优先检查 KV 块是否耗尽、batch token 上限是否过小、请求是否被适配器或会话路由分散，而不是立即增加 GPU。若 TTFT 随输入长度近似线性增长但排队时间稳定，瓶颈在 prefill 本身；若不同长度的 TTFT 一起恶化，则更像整体过载或队头阻塞。
+
+### 文档问答：长输入、短输出、共享前缀
+
+RAG 和文档分析的主要成本在 prefill，KV 占用则随文档和并发放大。应记录检索文档经过模板拼接后的真实 token，而不是只记录用户问题。若同一文档会被多轮查询，前缀缓存或显式 KV 复用可能有效；若检索结果顺序、时间戳或权限标签每次变化，表面相似的 prompt 也可能无法命中。
+
+这类服务先验证最大上下文下的单请求显存，再测并发，避免只用平均长度得出虚假的高承载。诊断时同时查看缓存命中 token、实际 prefill token 和缓存驻留空间。命中率高而 TTFT 没有改善，可能是命中块仍需搬运、路由没有把请求送到持有缓存的副本，或真正瓶颈已转移到 decode/网络。为了命中率无限延长缓存生命周期也不可取，因为旧块会挤压活跃请求并触发抢占。
+
+### Agent 与代码生成：短长交替、多轮、长输出
+
+Agent 往往反复附带工具结果，输入随轮次增长；代码生成和推理任务又可能产生很长输出。平均 QPS 看似低，但单请求占据 decode 槽位和 KV 的时间很长，取消、超时与客户端断连是否释放状态会决定实际容量。此类负载应以会话为单位回放完整轮次，并保留工具调用间的思考间隔，而不是把每轮打散成独立均匀请求。
+
+若 TPOT 在并发增加后恶化而 TTFT 尚可，通常是 decode batch、带宽或长序列注意力进入瓶颈；可比较降低最大并发、增加数据并行副本、使用更少 KV 头模型或调整优先级队列。若长会话持续抢占新请求，应为交互请求与后台长生成设置独立配额，或按剩余 token 预算做准入。推测解码只有在草稿 token 接受率足够高时才省时间，验收必须同时记录接受长度和额外模型成本。
+
+### 服务配置的验收卡
+
+每个服务等级上线前，都应留下同一张可复核的验收卡：工作负载样本时间范围与样本数；输入/输出二维分布和共享前缀率；模型、tokenizer、精度、引擎镜像与硬件拓扑；batch、chunk、KV、并行和缓存参数；从低负载到过载的完整曲线；目标点的各分位 TTFT/TPOT、goodput、显存与功耗；取消、超时、单副本故障和扩缩容结果。任何一项版本或流量分布发生实质变化，都要重新验证，而不是沿用旧吞吐数字。
+
+## 从原型到生产的测量闭环
+
+推理优化应从可复现实验开始。固定模型版本、权重精度、引擎版本、GPU 型号、并行拓扑与采样参数；用线上脱敏日志构造输入/输出长度的联合分布，保留共享前缀率、到达过程和流式连接行为。仅用固定 128/128 token 的合成请求，无法代表 RAG、代码生成或 Agent 工具循环。
+
+随后扫描 offered load，而非只测一个并发点。记录请求与 token 吞吐、各分位 TTFT/TPOT、端到端延迟、KV、抢占、队列、功耗和错误。生产工作点应留在吞吐变平而尾延迟急升的“膝点”左侧，并为故障与流量漂移留余量。
+
+最后再逐项打开前缀缓存、低精度 KV、推测解码、并行或 P/D 解耦。每次只改变一类变量，既比较收益，也验证输出质量与故障模式。一个成熟的推理平台并不是把优化开关全部打开，而是能解释：**当前瓶颈在哪里、哪个机制改变了哪条资源约束、它在什么条件下会失效。**
+
+## 参考资料
+
+- Kwon 等，[Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180)，SOSP 2023。
+- Yu 等，[Orca: A Distributed Serving System for Transformer-Based Generative Models](https://www.usenix.org/conference/osdi22/presentation/yu)，OSDI 2022。
+- Zhong 等，[DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving](https://www.usenix.org/conference/osdi24/presentation/zhong-yinmin)，OSDI 2024。
+- vLLM，[Automatic Prefix Caching](https://docs.vllm.ai/en/v0.9.1/design/automatic_prefix_caching.html)。
+- NVIDIA TensorRT-LLM，[GPT Attention 与 In-flight Batching](https://nvidia.github.io/TensorRT-LLM/latest/advanced/gpt-attention.html)。
+- NVIDIA，[Mastering LLM Techniques: Inference Optimization](https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/)。
+- NVIDIA，[Optimizing Inference for Long Context and Large Batch Sizes with NVFP4 KV Cache](https://developer.nvidia.com/blog/optimizing-inference-for-long-context-and-large-batch-sizes-with-nvfp4-kv-cache/)。

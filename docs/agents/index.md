@@ -19,18 +19,7 @@ Agent 能力并不是由一个提示词突然产生。它来自基模能力、�
 
 ## 能力形成链路
 
-```mermaid
-flowchart LR
-  A[预训练与中期训练] --> B[SFT]
-  B --> C[Reasoning RL]
-  C --> D[Agentic RL]
-  D --> E[工具与环境交互]
-  E --> F[可验证反馈]
-  F --> D
-  G[On-policy Distillation] --> C
-  H[Context Engineering] --> E
-  I[Test-time Scaling] --> E
-```
+<InteractiveFlow preset="agent" />
 
 ## 三个主题
 

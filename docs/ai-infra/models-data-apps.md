@@ -35,6 +35,12 @@ CLIP 建立跨模态对齐，DALL·E / Stable Diffusion 负责生成，BLIP 系�
 
 应用设计应先回答三个问题：模型何时需要外部信息、工具结果怎样验证、失败时系统如何回退。Qwen3 RAG、RAGFlow 等案例说明检索质量、切分、重排和引用仍是系统效果的关键。
 
+## 深入专题
+
+- [Scaling 与工作负载建模](/ai-infra/scaling-workloads)：理解模型、数据、计算预算与评估边界如何一起扩展。
+- [数据流水线](/ai-infra/data-pipeline)：从来源、清洗、去重、混合、版本到训练供数建立完整的数据控制面。
+- [推理服务系统](/ai-infra/inference-serving)：把模型结构对 KV Cache、调度和服务拓扑的影响落到工程指标。
+
 ## 来源
 
 - [Notion：06 大模型算法与数据](https://app.notion.com/p/06-33b3a54bd6b481599537e42346c6ca51)

@@ -23,6 +23,7 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: 'AI Infra', link: '/ai-infra/' },
+      { text: '论文速读', link: '/paper-reading/' },
       { text: 'Agent 能力', link: '/agents/' },
       { text: '技术棚屋', link: '/shed/projects' },
     ],
@@ -39,10 +40,60 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: '体系总览', link: '/ai-infra/' },
-          { text: '计算、通信与云原生', link: '/ai-infra/compute-network' },
-          { text: '训练与推理系统', link: '/ai-infra/training-inference' },
-          { text: '模型、数据与应用', link: '/ai-infra/models-data-apps' },
-          { text: '算子工程方法', link: '/ai-infra/operator-engineering' }
+          {
+            text: '规模与硬件',
+            collapsed: true,
+            items: [
+              { text: 'Scaling 与工作负载', link: '/ai-infra/scaling-workloads' },
+              { text: '加速器与显存体系', link: '/ai-infra/accelerators-memory' }
+            ]
+          },
+          {
+            text: '集群与平台',
+            collapsed: true,
+            items: [
+              { text: '计算、通信与云原生', link: '/ai-infra/compute-network' },
+              { text: '互连与集合通信', link: '/ai-infra/interconnect-collectives' },
+              { text: '存储与 Checkpoint', link: '/ai-infra/storage-checkpoint' },
+              { text: '调度与平台工程', link: '/ai-infra/scheduling-platform' },
+              { text: '可靠性与可观测性', link: '/ai-infra/reliability-observability' }
+            ]
+          },
+          {
+            text: '训练与推理',
+            collapsed: true,
+            items: [
+              { text: '训练与推理系统', link: '/ai-infra/training-inference' },
+              { text: '分布式训练', link: '/ai-infra/distributed-training' },
+              { text: '训练显存与数值', link: '/ai-infra/training-memory-numerics' },
+              { text: '推理服务系统', link: '/ai-infra/inference-serving' },
+              { text: '容量规划与成本', link: '/ai-infra/capacity-economics' }
+            ]
+          },
+          {
+            text: '数据与算子',
+            collapsed: true,
+            items: [
+              { text: '模型、数据与应用', link: '/ai-infra/models-data-apps' },
+              { text: '数据流水线', link: '/ai-infra/data-pipeline' },
+              { text: '算子工程方法', link: '/ai-infra/operator-engineering' },
+              { text: '算子与编译器', link: '/ai-infra/operator-compiler' }
+            ]
+          }
+        ]
+      },
+      {
+        text: '论文速读',
+        collapsed: false,
+        items: [
+          { text: '阅读总览', link: '/paper-reading/' },
+          { text: '模型架构与推理机制', link: '/paper-reading/model-architectures' },
+          { text: '推理、视觉与 OCR', link: '/paper-reading/reasoning-vision-models' },
+          { text: '强化学习与蒸馏', link: '/paper-reading/rl-and-distillation' },
+          { text: 'Agent 学习与记忆', link: '/paper-reading/agent-systems' },
+          { text: 'VLA 与机器人学习', link: '/paper-reading/vla-robotics' },
+          { text: '数据、评估与理论', link: '/paper-reading/evaluation-and-theory' },
+          { text: '工程资料与延伸阅读', link: '/paper-reading/resources' }
         ]
       },
       {
@@ -71,6 +122,7 @@ export default defineConfig({
           { text: 'Markdown 组件示例', link: '/appendix/components' },
           { text: '开发守则', link: '/appendix/development-rules' },
           { text: 'Notion 来源索引', link: '/appendix/notion-sources' },
+          { text: '论文速读来源', link: '/appendix/paper-reading-sources' },
           { text: '来源与许可', link: '/appendix/attribution' }
         ]
       }
@@ -105,7 +157,8 @@ export default defineConfig({
   },
   markdown: {
     theme: { light: 'github-light', dark: 'github-dark' },
-    lineNumbers: true
+    lineNumbers: true,
+    math: true
   },
   sitemap: {
     hostname: 'https://abromide.github.io/knowledge-summary/'

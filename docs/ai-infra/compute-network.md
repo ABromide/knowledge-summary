@@ -60,6 +60,14 @@ Checkpoint 不只是备份文件。大模型训练中的保存、恢复和跨节
 - 性能数据测的是峰值、端到端吞吐，还是故障后的长期均值？
 - 存储与调度策略是否匹配训练任务的持续时间和恢复成本？
 
+## 深入专题
+
+- [加速器与显存体系](/ai-infra/accelerators-memory)：把 GPU 指标放回 Roofline、内存层次和精度约束中理解。
+- [互连与集合通信](/ai-infra/interconnect-collectives)：从 PCIe、NVLink、RDMA 一直追到 collective 的真实数据路径。
+- [存储与 Checkpoint](/ai-infra/storage-checkpoint)：区分训练热数据、状态保存和归档三类路径。
+- [调度与平台工程](/ai-infra/scheduling-platform)：把 GPU、NUMA、NIC、Gang 和多租户边界交给控制面表达。
+- [可靠性与可观测性](/ai-infra/reliability-observability)：建立设备、节点、作业和服务的分层诊断闭环。
+
 ## 来源
 
 - [Notion：01 AI 计算集群](https://app.notion.com/p/01-AI-33b3a54bd6b481ca9c04cc173faa7102)

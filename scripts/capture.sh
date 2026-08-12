@@ -33,8 +33,7 @@ if [[ ! -x "${CHROME_BIN}" ]]; then
   exit 1
 fi
 
-if (( CAPTURE_WIDTH < 500 )); then
-  PROFILE_ROOT="$(cd "${TMPDIR:-/tmp}" && pwd -P)"
+PROFILE_ROOT="$(cd "${TMPDIR:-/tmp}" && pwd -P)"
   PROFILE_DIR="$(mktemp -d "${PROFILE_ROOT}/knowledge-capture.XXXXXX")"
   CHROME_PID=""
 
@@ -143,6 +142,7 @@ function waitForEvent(method) {
 }
 
 await command('Page.enable')
+await command('Runtime.enable')
 await command('Emulation.setDeviceMetricsOverride', {
   width,
   height,
@@ -155,6 +155,14 @@ await command('Emulation.setScrollbarsHidden', { hidden: true })
 const loaded = waitForEvent('Page.loadEventFired')
 await command('Page.navigate', { url: pageUrl })
 await loaded
+for (let attempt = 0; attempt < 50; attempt += 1) {
+  const ready = await command('Runtime.evaluate', {
+    expression: "Boolean(document.querySelector('.VPDoc, .VPHome'))",
+    returnByValue: true
+  })
+  if (ready.result.value) break
+  await new Promise((resolve) => setTimeout(resolve, 100))
+}
 await new Promise((resolve) => setTimeout(resolve, 500))
 
 const screenshot = await command('Page.captureScreenshot', {
@@ -167,14 +175,3 @@ await writeFile(outputPath, image)
 console.log(`${image.byteLength} bytes written to file ${outputPath}`)
 socket.close()
 NODE
-  exit 0
-fi
-
-"${CHROME_BIN}" \
-  --headless=new \
-  --hide-scrollbars \
-  --disable-gpu \
-  "${CHROME_ARGS[@]}" \
-  --window-size="${WINDOW_SIZE}" \
-  --screenshot="${OUTPUT_PATH}" \
-  "${PAGE_URL}"
