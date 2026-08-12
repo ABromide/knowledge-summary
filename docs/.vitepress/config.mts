@@ -5,12 +5,12 @@ const base = process.env.BASE_PATH || '/'
 export default defineConfig({
   lang: 'zh-CN',
   title: '知汇',
-  description: '把零散知识沉淀为可复用的认知体系',
+  description: '按主题整理 AI、工程与项目实践笔记',
   base,
   cleanUrls: true,
   lastUpdated: true,
   head: [
-    ['meta', { name: 'theme-color', content: '#0071e3' }],
+    ['meta', { name: 'theme-color', content: '#2563eb' }],
     ['meta', { name: 'keywords', content: '知识总结,知识管理,学习笔记,技术文档' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}assets/mark.svg` }]
   ],
@@ -22,48 +22,96 @@ export default defineConfig({
     siteTitle: false,
     nav: [
       { text: '首页', link: '/' },
-      { text: '知识方法', link: '/methods/capture' },
-      { text: '技术专题', link: '/topics/ai-foundation' },
-      { text: 'AI 能力体验', link: '/zh-cn/stage-1/ai-capabilities-through-games/' },
-      { text: '阅读笔记', link: '/reading/how-to-read' },
-      { text: '实践案例', link: '/cases/project-retro' },
-      {
-        text: '简体中文',
-        items: [{ text: '简体中文', link: '/' }]
-      }
+      { text: 'AI Infra', link: '/ai-infra/' },
+      { text: '论文速读', link: '/paper-reading/' },
+      { text: 'Agent 能力', link: '/agents/' },
+      { text: '技术棚屋', link: '/shed/projects' },
     ],
     sidebar: [
       {
-        text: '第一章 建立知识系统',
+        text: '知识总览',
         collapsed: false,
         items: [
-          { text: '从零散到体系', link: '/' },
-          { text: '知识地图', link: '/guide/knowledge-map' },
-          { text: 'AI 时代的编程初体验', link: '/zh-cn/stage-1/ai-capabilities-through-games/' }
+          { text: '分组首页', link: '/' }
         ]
       },
       {
-        text: '第二章 捕获与整理',
+        text: 'AI Infra',
         collapsed: false,
         items: [
-          { text: '高质量捕获', link: '/methods/capture' },
-          { text: '渐进式总结', link: '/methods/progressive-summary' }
+          { text: '体系总览', link: '/ai-infra/' },
+          {
+            text: '规模与硬件',
+            collapsed: true,
+            items: [
+              { text: 'Scaling 与工作负载', link: '/ai-infra/scaling-workloads' },
+              { text: '加速器与显存体系', link: '/ai-infra/accelerators-memory' }
+            ]
+          },
+          {
+            text: '集群与平台',
+            collapsed: true,
+            items: [
+              { text: '计算、通信与云原生', link: '/ai-infra/compute-network' },
+              { text: '互连与集合通信', link: '/ai-infra/interconnect-collectives' },
+              { text: '存储与 Checkpoint', link: '/ai-infra/storage-checkpoint' },
+              { text: '调度与平台工程', link: '/ai-infra/scheduling-platform' },
+              { text: '可靠性与可观测性', link: '/ai-infra/reliability-observability' }
+            ]
+          },
+          {
+            text: '训练与推理',
+            collapsed: true,
+            items: [
+              { text: '训练与推理系统', link: '/ai-infra/training-inference' },
+              { text: '分布式训练', link: '/ai-infra/distributed-training' },
+              { text: '训练显存与数值', link: '/ai-infra/training-memory-numerics' },
+              { text: '推理服务系统', link: '/ai-infra/inference-serving' },
+              { text: '容量规划与成本', link: '/ai-infra/capacity-economics' }
+            ]
+          },
+          {
+            text: '数据与算子',
+            collapsed: true,
+            items: [
+              { text: '模型、数据与应用', link: '/ai-infra/models-data-apps' },
+              { text: '数据流水线', link: '/ai-infra/data-pipeline' },
+              { text: '算子工程方法', link: '/ai-infra/operator-engineering' },
+              { text: '算子与编译器', link: '/ai-infra/operator-compiler' }
+            ]
+          }
         ]
       },
       {
-        text: '第三章 技术专题',
+        text: '论文速读',
         collapsed: false,
         items: [
-          { text: 'AI 基础认知', link: '/topics/ai-foundation' },
-          { text: '前端工程地图', link: '/topics/frontend-map' }
+          { text: '阅读总览', link: '/paper-reading/' },
+          { text: '模型架构与推理机制', link: '/paper-reading/model-architectures' },
+          { text: '推理、视觉与 OCR', link: '/paper-reading/reasoning-vision-models' },
+          { text: '强化学习与蒸馏', link: '/paper-reading/rl-and-distillation' },
+          { text: 'Agent 学习与记忆', link: '/paper-reading/agent-systems' },
+          { text: 'VLA 与机器人学习', link: '/paper-reading/vla-robotics' },
+          { text: '数据、评估与理论', link: '/paper-reading/evaluation-and-theory' },
+          { text: '工程资料与延伸阅读', link: '/paper-reading/resources' }
         ]
       },
       {
-        text: '第四章 阅读与实践',
+        text: 'Agent 能力',
         collapsed: false,
         items: [
-          { text: '如何做主题阅读', link: '/reading/how-to-read' },
-          { text: '项目复盘模板', link: '/cases/project-retro' }
+          { text: '主题总览', link: '/agents/' },
+          { text: '训练、推理与反馈', link: '/agents/training-and-reasoning' },
+          { text: 'Prompt 与上下文工程', link: '/agents/prompt-and-context' },
+          { text: '研究雷达', link: '/agents/research-radar' }
+        ]
+      },
+      {
+        text: '技术棚屋',
+        collapsed: false,
+        items: [
+          { text: '项目与实验', link: '/shed/projects' },
+          { text: '工程经验与踩坑', link: '/shed/engineering-notes' }
         ]
       },
       {
@@ -73,6 +121,8 @@ export default defineConfig({
           { text: '内容维护指南', link: '/appendix/maintenance' },
           { text: 'Markdown 组件示例', link: '/appendix/components' },
           { text: '开发守则', link: '/appendix/development-rules' },
+          { text: 'Notion 来源索引', link: '/appendix/notion-sources' },
+          { text: '论文速读来源', link: '/appendix/paper-reading-sources' },
           { text: '来源与许可', link: '/appendix/attribution' }
         ]
       }
@@ -107,7 +157,8 @@ export default defineConfig({
   },
   markdown: {
     theme: { light: 'github-light', dark: 'github-dark' },
-    lineNumbers: true
+    lineNumbers: true,
+    math: true
   },
   sitemap: {
     hostname: 'https://abromide.github.io/knowledge-summary/'

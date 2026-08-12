@@ -24,13 +24,15 @@ onMounted(() => {
     class="knowledge-sidebar-toggle"
     type="button"
     :aria-label="collapsed ? '展开目录' : '收起目录'"
+    :aria-expanded="!collapsed"
     :title="collapsed ? '展开目录' : '收起目录'"
     @click.stop.prevent="toggleSidebar"
   >
     <svg viewBox="0 0 16 16" aria-hidden="true">
-      <rect x="1" y="2" width="14" height="1.5" rx="0.75" />
-      <rect x="1" y="7.25" width="14" height="1.5" rx="0.75" />
-      <rect x="1" y="12.5" width="14" height="1.5" rx="0.75" />
+      <rect x="1.5" y="2" width="13" height="12" rx="2" />
+      <path d="M6 2v12" />
+      <path v-if="collapsed" d="m9 5.5 2.5 2.5L9 10.5" />
+      <path v-else d="m11.5 5.5-2.5 2.5 2.5 2.5" />
     </svg>
   </button>
 </template>

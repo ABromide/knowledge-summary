@@ -33,3 +33,10 @@ type Note = {
 | --- | --- |
 | `SummaryHero` | 展示章节目标、预计耗时和预期产出 |
 | `StatGrid` | 展示一组关键指标或方法要点 |
+| `InteractiveFlow` | 展示可选择节点、上下游关系和节点说明；用于替代前端 Mermaid 源码块 |
+| `CapacityLab` | 用滑块调整容量假设并实时计算量级；结果必须附带估算边界 |
+| `TradeoffExplorer` | 用场景标签比较收益、代价和验证动作 |
+| `TopologyExplorer` | 用可切换关系图解释集合通信与并行维度的拓扑放置 |
+| `ResearchWorkbench` | 用 Tabs 切换论文阅读视角、关键证据与下一步验证动作 |
+| `PaperCatalog` | 搜索并按主题筛选论文、模型和工程资料 |
+| `ZoomableImage` | 将论文配图呈现为可放大、缩小、还原和关闭的图片预览 |
